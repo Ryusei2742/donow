@@ -19,6 +19,10 @@ module Donow
     # Date.current and Time.current drive the daily dashboard and work logs.
     config.time_zone = "Tokyo"
 
+    config.generators do |generators|
+      generators.test_framework :rspec
+    end
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files

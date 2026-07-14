@@ -30,6 +30,8 @@
 
 /public/assets
 
+# RSpec example status persistence.
+/.rspec_status
+
 # Ignore key files for decrypting credentials and more.
 /config/*.key
-
