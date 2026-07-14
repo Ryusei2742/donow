@@ -1,9 +1,11 @@
 require "rails_helper"
 
 RSpec.describe Task, type: :model do
+  let(:user) { User.create!(email_address: "owner@example.com", password: "password123") }
+
   describe "validations and defaults" do
     it "requires title, status, and scheduled date" do
-      task = described_class.new(title: nil, status: nil, scheduled_date: nil)
+      task = described_class.new(user: user, title: nil, status: nil, scheduled_date: nil)
 
       expect(task).not_to be_valid
       expect(task.errors[:title]).to be_present
@@ -12,7 +14,7 @@ RSpec.describe Task, type: :model do
     end
 
     it "defaults a new task to pending and today" do
-      task = described_class.new(title: "5分だけ始める")
+      task = described_class.new(user: user, title: "5分だけ始める")
 
       expect(task).to be_pending
       expect(task.scheduled_date).to eq(Date.current)
@@ -23,6 +25,7 @@ RSpec.describe Task, type: :model do
   describe "work actions" do
     let(:task) do
       described_class.create!(
+        user: user,
         title: "企画書を開く",
         scheduled_date: Date.current,
         estimated_minutes: 5

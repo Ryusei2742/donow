@@ -27,11 +27,15 @@
     <header class="site-header">
       <div class="container header-inner">
         <%= link_to "DoNow", root_path, class: "brand" %>
-        <nav class="main-nav" aria-label="メインナビゲーション">
-          <%= link_to "今日", root_path %>
-          <%= link_to "タスク", tasks_path %>
-          <%= link_to "履歴", history_path %>
-        </nav>
+        <% if authenticated? %>
+          <nav class="main-nav" aria-label="メインナビゲーション">
+            <%= link_to "今日", root_path %>
+            <%= link_to "タスク", tasks_path %>
+            <%= link_to "履歴", history_path %>
+            <span class="account-email"><%= Current.user.email_address %></span>
+            <%= button_to "ログアウト", session_path, method: :delete, class: "nav-logout" %>
+          </nav>
+        <% end %>
       </div>
     </header>
 

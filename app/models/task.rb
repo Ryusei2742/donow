@@ -1,6 +1,7 @@
 class Task < ApplicationRecord
   STATUSES = %w[pending active completed skipped].freeze
 
+  belongs_to :user
   has_many :work_sessions, dependent: :destroy
 
   enum :status, STATUSES.index_with(&:itself), default: :pending, validate: true

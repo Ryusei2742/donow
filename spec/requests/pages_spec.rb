@@ -1,8 +1,14 @@
 require "rails_helper"
 
 RSpec.describe "DoNow pages", type: :request do
+  let(:user) { User.create!(email_address: "owner@example.com", password: "password123") }
+
+  before do
+    post session_path, params: { email_address: user.email_address, password: "password123" }
+  end
+
   def create_task(attributes = {})
-    Task.create!(
+    user.tasks.create!(
       {
         title: "企画書を開く",
         scheduled_date: Date.current

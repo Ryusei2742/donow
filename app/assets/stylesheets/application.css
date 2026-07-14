@@ -49,9 +49,12 @@ h3 { line-height: 1.35; }
 
 .header-inner { min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .brand { color: var(--ink); font-size: 1.35rem; font-weight: 850; letter-spacing: -0.04em; text-decoration: none; }
-.main-nav { display: flex; gap: 8px; }
+.main-nav { display: flex; align-items: center; gap: 8px; }
 .main-nav a { padding: 7px 12px; border-radius: 999px; color: var(--muted); font-weight: 650; text-decoration: none; }
 .main-nav a:hover { color: var(--green); background: var(--green-soft); }
+.account-email { color: var(--muted); font-size: 0.85rem; }
+.nav-logout { padding: 7px 12px; border: 0; border-radius: 999px; color: var(--muted); background: transparent; font: inherit; font-weight: 650; cursor: pointer; }
+.nav-logout:hover { color: var(--green); background: var(--green-soft); }
 
 .page-content { padding-block: 42px 72px; }
 .hero { padding: clamp(30px, 7vw, 76px) 0 48px; text-align: center; }

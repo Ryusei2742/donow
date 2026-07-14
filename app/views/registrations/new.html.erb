@@ -1,0 +1,40 @@
+<% content_for :title, "新規登録 | DoNow" %>
+
+<div class="narrow-page">
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">CREATE ACCOUNT</p>
+      <h1>新規ユーザー登録</h1>
+    </div>
+  </div>
+
+  <%= form_with model: @user, url: registration_path, class: "task-form" do |form| %>
+    <% if @user.errors.any? %>
+      <div class="error-box" role="alert">
+        <h2>入力内容を確認してください</h2>
+        <ul>
+          <% @user.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="field">
+      <%= form.label :email_address, "メールアドレス" %>
+      <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "email" %>
+    </div>
+    <div class="field">
+      <%= form.label :password, "パスワード" %>
+      <%= form.password_field :password, required: true, autocomplete: "new-password", maxlength: 72 %>
+    </div>
+    <div class="field">
+      <%= form.label :password_confirmation, "パスワード（確認）" %>
+      <%= form.password_field :password_confirmation, required: true, autocomplete: "new-password", maxlength: 72 %>
+    </div>
+    <div class="form-actions">
+      <%= form.submit "登録する", class: "button button-primary" %>
+      <%= link_to "ログインへ", new_session_path, class: "button button-quiet" %>
+    </div>
+  <% end %>
+</div>

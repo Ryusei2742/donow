@@ -1,7 +1,8 @@
 require "rails_helper"
 
 RSpec.describe WorkSession, type: :model do
-  let(:task) { Task.create!(title: "企画書を開く", scheduled_date: Date.current) }
+  let(:user) { User.create!(email_address: "owner@example.com", password: "password123") }
+  let(:task) { Task.create!(user: user, title: "企画書を開く", scheduled_date: Date.current) }
 
   it "requires a task, started_at, and status" do
     session = described_class.new(task: nil, started_at: nil, status: nil)
@@ -17,6 +18,7 @@ RSpec.describe WorkSession, type: :model do
 
     expect(session).to be_active
     expect(session).to be_valid
+    expect(session.user).to eq(user)
   end
 
   it "does not allow ended_at before started_at" do

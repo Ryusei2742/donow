@@ -1,0 +1,26 @@
+<% content_for :title, "ログイン | DoNow" %>
+
+<div class="narrow-page">
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">WELCOME BACK</p>
+      <h1>ログイン</h1>
+    </div>
+  </div>
+
+  <%= form_with url: session_path, class: "task-form" do |form| %>
+    <div class="field">
+      <%= form.label :email_address, "メールアドレス" %>
+      <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", value: params[:email_address] %>
+    </div>
+    <div class="field">
+      <%= form.label :password, "パスワード" %>
+      <%= form.password_field :password, required: true, autocomplete: "current-password", maxlength: 72 %>
+    </div>
+    <div class="form-actions">
+      <%= form.submit "ログイン", class: "button button-primary" %>
+      <%= link_to "新規登録", new_registration_path, class: "button button-secondary" %>
+      <%= link_to "パスワードを忘れた方", new_password_path, class: "button button-quiet" %>
+    </div>
+  <% end %>
+</div>

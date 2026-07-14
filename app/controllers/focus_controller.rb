@@ -1,5 +1,5 @@
 class FocusController < ApplicationController
   def show
-    @task = Task.find_by(id: params[:task_id])
+    @task = Current.user.tasks.find(params[:task_id]) if params[:task_id].present?
   end
 end

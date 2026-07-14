@@ -2,6 +2,7 @@ class WorkSession < ApplicationRecord
   STATUSES = %w[active completed interrupted].freeze
 
   belongs_to :task
+  has_one :user, through: :task
 
   enum :status, STATUSES.index_with(&:itself), default: :active, validate: true
 
