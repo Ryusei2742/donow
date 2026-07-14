@@ -1,0 +1,48 @@
+<% content_for :title, "今日 | DoNow" %>
+
+<section class="hero">
+  <p class="eyebrow">START SMALL. START NOW.</p>
+  <h1>DoNow</h1>
+  <p class="catchphrase">やる気ではなく、着手を記録する</p>
+  <div class="hero-actions">
+    <%= link_to "5分だけ始める", focus_path, class: "button button-primary button-large" %>
+    <%= link_to "今日のタスクを追加", new_task_path, class: "button button-secondary" %>
+  </div>
+</section>
+
+<section class="stats-grid" aria-label="今日の集計">
+  <div class="stat-card">
+    <span class="stat-number"><%= @completed_count %></span>
+    <span class="stat-label">完了</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-number"><%= @incomplete_count %></span>
+    <span class="stat-label">未完了</span>
+  </div>
+  <div class="stat-card stat-card-accent">
+    <span class="stat-number"><%= @started_count %></span>
+    <span class="stat-label">着手済み</span>
+  </div>
+</section>
+
+<section class="section-block">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow"><%= format_date(Date.current) %></p>
+      <h2>今日のタスク</h2>
+    </div>
+    <%= link_to "+ 追加", new_task_path, class: "text-link" %>
+  </div>
+
+  <% if @tasks.any? %>
+    <div class="task-list">
+      <%= render @tasks %>
+    </div>
+  <% else %>
+    <div class="empty-state">
+      <h3>今日やることを1つ決めましょう</h3>
+      <p>大きな計画より、次の小さな一歩を登録してみてください。</p>
+      <%= link_to "最初のタスクを作る", new_task_path, class: "button button-primary" %>
+    </div>
+  <% end %>
+</section>

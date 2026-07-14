@@ -1,0 +1,46 @@
+<%= form_with model: task, class: "task-form" do |form| %>
+  <% if task.errors.any? %>
+    <div class="error-box" role="alert">
+      <h2>入力内容を確認してください</h2>
+      <ul>
+        <% task.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field field-wide">
+    <%= form.label :title, "タイトル" %>
+    <%= form.text_field :title, autofocus: true, required: true, placeholder: "例：企画書を5分だけ開く" %>
+  </div>
+
+  <div class="field field-wide">
+    <%= form.label :description, "メモ" %>
+    <%= form.text_area :description, rows: 5, placeholder: "最初に何をするかを書いておくと着手しやすくなります" %>
+  </div>
+
+  <div class="form-row">
+    <div class="field">
+      <%= form.label :scheduled_date, "予定日" %>
+      <%= form.date_field :scheduled_date, required: true %>
+    </div>
+    <div class="field">
+      <%= form.label :estimated_minutes, "見積もり（分）" %>
+      <%= form.number_field :estimated_minutes, min: 1, step: 1, placeholder: "5" %>
+    </div>
+  </div>
+
+  <% if task.persisted? %>
+    <div class="field">
+      <%= form.label :status, "状態" %>
+      <%= form.select :status, Task::STATUSES.map { |status| [ApplicationHelper::TASK_STATUS_LABELS.fetch(status), status] } %>
+      <p class="field-hint">着手・完了の記録には、タスク画面の操作ボタンがおすすめです。</p>
+    </div>
+  <% end %>
+
+  <div class="form-actions">
+    <%= form.submit task.new_record? ? "タスクを作成" : "変更を保存", class: "button button-primary" %>
+    <%= link_to "キャンセル", task.persisted? ? task_path(task) : root_path, class: "button button-quiet" %>
+  </div>
+<% end %>

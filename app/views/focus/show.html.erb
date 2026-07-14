@@ -1,0 +1,30 @@
+<% content_for :title, "5分だけモード | DoNow" %>
+
+<section class="focus-panel" data-controller="countdown" data-countdown-seconds-value="300">
+  <p class="eyebrow">JUST FIVE MINUTES</p>
+  <h1>まず5分だけやりましょう</h1>
+  <% if @task %>
+    <p class="focus-task"><%= @task.title %></p>
+    <% unless @task.active? %>
+      <%= button_to "このタスクの着手を記録", start_task_path(@task), method: :patch, class: "button button-primary" %>
+    <% end %>
+  <% else %>
+    <p class="muted">完璧に終わらせなくて大丈夫。手を動かし始めることがゴールです。</p>
+  <% end %>
+
+  <div class="timer" data-countdown-target="display" aria-live="polite">5:00</div>
+  <p class="timer-message" data-countdown-target="message">深呼吸して、最初の一歩から。</p>
+  <div class="focus-actions">
+    <button type="button" class="button button-primary button-large" data-action="countdown#toggle" data-countdown-target="button">スタート</button>
+    <button type="button" class="button button-secondary" data-action="countdown#reset">リセット</button>
+  </div>
+
+  <% if @task&.active? %>
+    <div class="task-actions focus-completion">
+      <%= button_to "完了した", complete_task_path(@task), method: :patch, class: "button button-success" %>
+      <%= button_to "ここで中断", interrupt_task_path(@task), method: :patch, class: "button button-quiet" %>
+    </div>
+  <% end %>
+
+  <%= link_to "今日の画面へ戻る", root_path, class: "text-link back-link" %>
+</section>

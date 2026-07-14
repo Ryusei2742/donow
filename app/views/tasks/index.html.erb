@@ -1,0 +1,23 @@
+<% content_for :title, "タスク一覧 | DoNow" %>
+
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">TASKS</p>
+    <h1>タスク一覧</h1>
+  </div>
+  <%= link_to "新しいタスク", new_task_path, class: "button button-primary" %>
+</div>
+
+<% if @tasks.any? %>
+  <% @tasks.group_by(&:scheduled_date).each do |date, tasks| %>
+    <section class="dated-section">
+      <h2><%= format_date(date) %></h2>
+      <div class="task-list"><%= render tasks %></div>
+    </section>
+  <% end %>
+<% else %>
+  <div class="empty-state">
+    <h2>タスクはまだありません</h2>
+    <%= link_to "今日のタスクを作る", new_task_path, class: "button button-primary" %>
+  </div>
+<% end %>

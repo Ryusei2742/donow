@@ -1,0 +1,18 @@
+<article class="task-card status-<%= task.status %>">
+  <div class="task-main">
+    <div class="task-meta">
+      <span class="badge badge-<%= task.status %>"><%= task_status_label(task) %></span>
+      <% if task.work_sessions.exists? %>
+        <span class="started-mark">着手記録あり</span>
+      <% end %>
+      <% if task.estimated_minutes.present? %>
+        <span><%= task.estimated_minutes %>分</span>
+      <% end %>
+    </div>
+    <h3><%= link_to task.title, task %></h3>
+    <% if task.description.present? %>
+      <p class="task-description"><%= truncate(task.description, length: 100) %></p>
+    <% end %>
+  </div>
+  <%= render "tasks/actions", task: task %>
+</article>

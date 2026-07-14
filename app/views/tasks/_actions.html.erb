@@ -1,0 +1,12 @@
+<div class="task-actions">
+  <% if task.active? %>
+    <%= button_to "完了", complete_task_path(task), method: :patch, class: "button button-success" %>
+    <%= button_to "中断", interrupt_task_path(task), method: :patch, class: "button button-secondary" %>
+    <%= link_to "5分モード", focus_path(task_id: task.id), class: "button button-quiet" %>
+  <% else %>
+    <%= button_to "今からやる", start_task_path(task), method: :patch, class: "button button-primary" %>
+    <% unless task.completed? || task.skipped? %>
+      <%= button_to "スキップ", skip_task_path(task), method: :patch, class: "button button-quiet" %>
+    <% end %>
+  <% end %>
+</div>

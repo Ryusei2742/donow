@@ -1,0 +1,49 @@
+<% content_for :title, "履歴 | DoNow" %>
+
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">HISTORY</p>
+    <h1>タスクと着手の履歴</h1>
+    <p>終わったことだけでなく、始めたことも振り返れます。</p>
+  </div>
+</div>
+
+<div class="history-layout">
+  <section>
+    <h2>日付別タスク</h2>
+    <% if @tasks_by_date.any? %>
+      <% @tasks_by_date.each do |date, tasks| %>
+        <div class="history-day">
+          <h3><%= format_date(date) %></h3>
+          <% tasks.each do |task| %>
+            <div class="history-task">
+              <span class="badge badge-<%= task.status %>"><%= task_status_label(task) %></span>
+              <%= link_to task.title, task %>
+              <% if task.work_sessions.any? %>
+                <span class="started-mark"><%= task.work_sessions.size %>回着手</span>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% else %>
+      <p class="muted">履歴はまだありません。</p>
+    <% end %>
+  </section>
+
+  <aside>
+    <h2>最近の着手記録</h2>
+    <% if @work_sessions.any? %>
+      <div class="history-sessions">
+        <% @work_sessions.each do |session| %>
+          <div class="history-session">
+            <%= link_to session.task.title, session.task, class: "session-task-title" %>
+            <%= render "work_sessions/session", session: session %>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="muted">「今からやる」を押すと、ここに着手記録が残ります。</p>
+    <% end %>
+  </aside>
+</div>

@@ -1,0 +1,41 @@
+<% content_for :title, "#{@task.title} | DoNow" %>
+
+<article class="detail-card">
+  <div class="detail-header">
+    <div>
+      <div class="task-meta">
+        <span class="badge badge-<%= @task.status %>"><%= task_status_label(@task) %></span>
+        <span><%= format_date(@task.scheduled_date) %></span>
+        <% if @task.estimated_minutes.present? %><span>見積もり <%= @task.estimated_minutes %>分</span><% end %>
+      </div>
+      <h1><%= @task.title %></h1>
+    </div>
+    <%= link_to "編集", edit_task_path(@task), class: "button button-secondary" %>
+  </div>
+
+  <% if @task.description.present? %>
+    <div class="description"><%= simple_format(@task.description) %></div>
+  <% end %>
+
+  <%= render "actions", task: @task %>
+</article>
+
+<section class="section-block">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">WORK SESSIONS</p>
+      <h2>着手の記録</h2>
+    </div>
+  </div>
+  <% if @work_sessions.any? %>
+    <div class="session-list">
+      <%= render partial: "work_sessions/session", collection: @work_sessions %>
+    </div>
+  <% else %>
+    <p class="muted">まだ着手記録はありません。「今からやる」を押すと記録が始まります。</p>
+  <% end %>
+</section>
+
+<div class="danger-zone">
+  <%= button_to "このタスクを削除", @task, method: :delete, class: "text-button-danger", form: { data: { turbo_confirm: "このタスクと着手記録を削除しますか？" } } %>
+</div>

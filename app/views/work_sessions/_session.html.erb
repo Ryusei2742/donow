@@ -1,0 +1,10 @@
+<div class="session-row">
+  <span class="badge session-<%= session.status %>"><%= session_status_label(session) %></span>
+  <span><%= format_time(session.started_at) %> 開始</span>
+  <% if session.ended_at %>
+    <span><%= session.ended_at.in_time_zone.strftime("%H:%M") %> 終了</span>
+    <span class="muted"><%= session.duration_minutes %>分</span>
+  <% else %>
+    <span class="live-dot">進行中</span>
+  <% end %>
+</div>
