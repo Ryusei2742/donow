@@ -40,6 +40,19 @@ RSpec.describe Task, type: :model do
         expect(task.open_work_session).to be_active
         expect { task.start! }.not_to change { task.work_sessions.count }
       end
+
+      it "prevents another task from creating a second active session" do
+        task.start!
+        other_task = described_class.create!(
+          user: user,
+          title: "別のタスク",
+          scheduled_date: Date.current
+        )
+
+        expect { other_task.start! }.to raise_error(ActiveRecord::RecordInvalid)
+        expect(user.work_sessions.open.count).to eq(1)
+        expect(other_task.reload).to be_pending
+      end
     end
 
     describe "#complete!" do

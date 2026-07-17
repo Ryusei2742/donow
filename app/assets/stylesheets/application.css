@@ -156,9 +156,20 @@ h3 { line-height: 1.35; }
 .focus-panel { width: min(690px, 100%); margin: 20px auto; padding: clamp(32px, 7vw, 68px); border: 1px solid #b8dcc9; border-radius: 28px; background: rgba(255, 255, 255, 0.92); box-shadow: var(--shadow); text-align: center; }
 .focus-panel h1 { margin-bottom: 18px; font-size: clamp(2rem, 6vw, 3.5rem); }
 .focus-task { display: inline-block; padding: 8px 14px; border-radius: 10px; background: var(--yellow-soft); font-weight: 750; }
+.focus-session-meta { margin: 8px 0 0; color: var(--muted); font-size: 0.85rem; }
 .timer { margin: 28px 0 0; font-size: clamp(5rem, 20vw, 9rem); font-variant-numeric: tabular-nums; font-weight: 850; letter-spacing: -0.08em; line-height: 1; }
 .timer-message { min-height: 27px; margin: 16px 0 24px; color: var(--muted); }
-.focus-completion { justify-content: center; margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--line); }
+.focus-start-form { width: min(480px, 100%); margin: 30px auto 0; }
+.focus-task-field { text-align: left; }
+.focus-start-form > .button { width: 100%; }
+.focus-running-actions { display: flex; justify-content: center; }
+.focus-outcome { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--line); }
+.focus-outcome h2 { margin-bottom: 6px; }
+.focus-outcome p { color: var(--muted); }
+.focus-outcome-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.focus-outcome-actions form, .focus-outcome-actions .button { width: 100%; }
+.focus-empty-state { margin-top: 28px; padding-block: 30px; }
+[hidden] { display: none !important; }
 .back-link { display: inline-block; margin-top: 30px; }
 
 .history-layout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.7fr); gap: 32px; }
@@ -197,4 +208,6 @@ h3 { line-height: 1.35; }
   .form-row { grid-template-columns: 1fr; gap: 0; }
   .task-form, .detail-card { padding: 20px; border-radius: 16px; }
   .focus-panel { padding: 34px 18px; border-radius: 20px; }
+  .focus-outcome-actions { grid-template-columns: 1fr; }
+  .focus-outcome-actions .button { min-height: 50px; }
 }

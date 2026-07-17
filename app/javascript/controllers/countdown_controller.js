@@ -1,64 +1,42 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["display", "button", "message"]
-  static values = { seconds: { type: Number, default: 300 } }
+  static targets = ["display", "message", "running", "outcome"]
+  static values = { endAt: String }
 
   connect() {
-    this.remaining = this.secondsValue
-    this.running = false
+    if (!this.hasEndAtValue || !this.hasDisplayTarget) return
+
+    this.handleVisibilityChange = () => this.render()
+    document.addEventListener("visibilitychange", this.handleVisibilityChange)
     this.render()
+    this.interval = window.setInterval(() => this.render(), 250)
   }
 
   disconnect() {
-    this.stopTimer()
-  }
-
-  toggle() {
-    this.running ? this.pause() : this.start()
-  }
-
-  start() {
-    if (this.remaining <= 0) this.remaining = this.secondsValue
-    this.running = true
-    this.buttonTarget.textContent = "一時停止"
-    this.messageTarget.textContent = "今はこの5分だけに集中しましょう。"
-    this.interval = window.setInterval(() => this.tick(), 1000)
-  }
-
-  pause() {
-    this.stopTimer()
-    this.buttonTarget.textContent = "再開"
-    this.messageTarget.textContent = "止まっても大丈夫。いつでも再開できます。"
-  }
-
-  reset() {
-    this.stopTimer()
-    this.remaining = this.secondsValue
-    this.buttonTarget.textContent = "スタート"
-    this.messageTarget.textContent = "深呼吸して、最初の一歩から。"
-    this.render()
-  }
-
-  tick() {
-    this.remaining -= 1
-    this.render()
-    if (this.remaining <= 0) {
-      this.stopTimer()
-      this.buttonTarget.textContent = "もう5分"
-      this.messageTarget.textContent = "5分できました。着手できたことが成果です！"
+    if (this.interval) window.clearInterval(this.interval)
+    if (this.handleVisibilityChange) {
+      document.removeEventListener("visibilitychange", this.handleVisibilityChange)
     }
   }
 
-  stopTimer() {
-    if (this.interval) window.clearInterval(this.interval)
-    this.interval = null
-    this.running = false
+  render() {
+    const endAt = Date.parse(this.endAtValue)
+    if (Number.isNaN(endAt)) return
+
+    const remaining = Math.max(0, Math.ceil((endAt - Date.now()) / 1000))
+    const minutes = Math.floor(remaining / 60)
+    const seconds = String(remaining % 60).padStart(2, "0")
+    this.displayTarget.textContent = `${minutes}:${seconds}`
+
+    if (remaining === 0) this.expire()
   }
 
-  render() {
-    const minutes = Math.floor(this.remaining / 60)
-    const seconds = String(this.remaining % 60).padStart(2, "0")
-    this.displayTarget.textContent = `${minutes}:${seconds}`
+  expire() {
+    if (this.interval) window.clearInterval(this.interval)
+    this.interval = null
+    if (this.hasMessageTarget) this.messageTarget.textContent = "時間になりました。次の行動を選びましょう。"
+    if (this.hasRunningTarget) this.runningTarget.hidden = true
+    if (this.hasOutcomeTarget) this.outcomeTarget.hidden = false
   }
 }

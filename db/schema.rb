@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_14_120335) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_18_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -49,16 +49,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_14_120335) do
   create_table "work_sessions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "ended_at"
+    t.integer "planned_duration_seconds"
     t.datetime "started_at", null: false
     t.string "status", default: "active", null: false
     t.bigint "task_id", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
     t.index ["started_at"], name: "index_work_sessions_on_started_at"
     t.index ["task_id", "status"], name: "index_work_sessions_on_task_id_and_status"
     t.index ["task_id"], name: "index_work_sessions_on_task_id"
+    t.index ["user_id"], name: "index_work_sessions_on_one_active_per_user", unique: true, where: "(((status)::text = 'active'::text) AND (ended_at IS NULL))"
+    t.index ["user_id"], name: "index_work_sessions_on_user_id"
+    t.check_constraint "planned_duration_seconds IS NULL OR planned_duration_seconds > 0", name: "work_sessions_positive_planned_duration"
   end
 
   add_foreign_key "sessions", "users"
   add_foreign_key "tasks", "users"
   add_foreign_key "work_sessions", "tasks"
+  add_foreign_key "work_sessions", "users"
 end

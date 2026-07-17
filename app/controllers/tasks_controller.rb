@@ -41,6 +41,8 @@ class TasksController < ApplicationController
   def start
     @task.start!
     redirect_back fallback_location: @task, notice: "着手を記録しました。まず5分だけ進めましょう。"
+  rescue ActiveRecord::RecordInvalid => error
+    redirect_back fallback_location: @task, alert: error.record.errors.full_messages.to_sentence
   end
 
   def complete

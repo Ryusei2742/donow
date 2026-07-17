@@ -1,29 +1,66 @@
-<% content_for :title, "5分だけモード | DoNow" %>
+<% content_for :title, "集中タイマー | DoNow" %>
 
-<section class="focus-panel" data-controller="countdown" data-countdown-seconds-value="300">
-  <p class="eyebrow">JUST FIVE MINUTES</p>
-  <h1>まず5分だけやりましょう</h1>
-  <% if @task %>
-    <p class="focus-task"><%= @task.title %></p>
-    <% unless @task.active? %>
-      <%= button_to "このタスクの着手を記録", start_task_path(@task), method: :patch, class: "button button-primary" %>
-    <% end %>
-  <% else %>
-    <p class="muted">完璧に終わらせなくて大丈夫。手を動かし始めることがゴールです。</p>
+<section
+  class="focus-panel"
+  data-controller="countdown"
+  <% if @active_session %>
+    data-countdown-end-at-value="<%= @active_session.ends_at.iso8601(3) %>"
   <% end %>
+>
+  <p class="eyebrow">JUST FIVE MINUTES</p>
 
-  <div class="timer" data-countdown-target="display" aria-live="polite">5:00</div>
-  <p class="timer-message" data-countdown-target="message">深呼吸して、最初の一歩から。</p>
-  <div class="focus-actions">
-    <button type="button" class="button button-primary button-large" data-action="countdown#toggle" data-countdown-target="button">スタート</button>
-    <button type="button" class="button button-secondary" data-action="countdown#reset">リセット</button>
-  </div>
+  <% if @active_session %>
+    <% remaining_seconds = @active_session.remaining_seconds %>
+    <% expired = remaining_seconds.zero? %>
 
-  <% if @task&.active? %>
-    <div class="task-actions focus-completion">
-      <%= button_to "完了した", complete_task_path(@task), method: :patch, class: "button button-success" %>
-      <%= button_to "ここで中断", interrupt_task_path(@task), method: :patch, class: "button button-quiet" %>
+    <h1>今はこのタスクだけ</h1>
+    <p class="focus-task"><%= @active_session.task.title %></p>
+    <p class="focus-session-meta">
+      <%= l(@active_session.started_at, format: :short) %> 開始
+      ・合計 <%= @active_session.planned_duration_seconds / 60 %>分
+    </p>
+
+    <div class="timer" data-countdown-target="display" aria-live="polite">
+      <%= format("%d:%02d", remaining_seconds / 60, remaining_seconds % 60) %>
     </div>
+    <p class="timer-message" data-countdown-target="message">
+      <%= expired ? "時間になりました。次の行動を選びましょう。" : "今はこの時間だけに集中しましょう。" %>
+    </p>
+
+    <div class="focus-running-actions" data-countdown-target="running" <%= "hidden" if expired %>>
+      <%= button_to "中断する", interrupt_focus_path(@active_session), method: :patch, class: "button button-quiet" %>
+    </div>
+
+    <div class="focus-outcome" data-countdown-target="outcome" <%= "hidden" unless expired %>>
+      <h2>ここまでできました</h2>
+      <p>続けるか、区切りをつけるかを選んでください。</p>
+      <div class="focus-outcome-actions">
+        <%= button_to "完了する", complete_focus_path(@active_session), method: :patch, class: "button button-success" %>
+        <%= button_to "5分延長する", extend_focus_path(@active_session), method: :patch, params: { seconds: 5.minutes.to_i }, class: "button button-primary" %>
+        <%= button_to "10分延長する", extend_focus_path(@active_session), method: :patch, params: { seconds: 10.minutes.to_i }, class: "button button-secondary" %>
+        <%= button_to "中断する", interrupt_focus_path(@active_session), method: :patch, class: "button button-quiet" %>
+      </div>
+    </div>
+  <% else %>
+    <h1>まず5分だけやりましょう</h1>
+    <p class="muted">取りかかるタスクを1つ選んでください。開始後は、ブラウザを閉じても続きから復元できます。</p>
+
+    <% if @tasks.any? %>
+      <%= form_with url: start_focus_path, method: :post, class: "focus-start-form" do |form| %>
+        <div class="field focus-task-field">
+          <%= form.label :task_id, "集中するタスク" %>
+          <%= form.collection_select :task_id, @tasks, :id, :title,
+                                     { selected: @selected_task&.id, prompt: "タスクを選択してください" },
+                                     { required: true } %>
+        </div>
+        <%= form.submit "5分タイマーを開始", class: "button button-primary button-large" %>
+      <% end %>
+    <% else %>
+      <div class="empty-state focus-empty-state">
+        <p>開始できるタスクがありません。</p>
+        <%= link_to "タスクを作成する", new_task_path, class: "button button-primary" %>
+      </div>
+    <% end %>
   <% end %>
 
   <%= link_to "今日の画面へ戻る", root_path, class: "text-link back-link" %>

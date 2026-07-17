@@ -33,4 +33,26 @@ RSpec.describe WorkSession, type: :model do
     expect(session).not_to be_valid
     expect(session.errors[:ended_at]).to be_present
   end
+
+  it "does not allow a user to have multiple active sessions" do
+    first_task = task
+    second_task = user.tasks.create!(title: "次のタスク", scheduled_date: Date.current)
+    described_class.create!(task: first_task, started_at: Time.current)
+    duplicate = described_class.new(task: second_task, started_at: Time.current)
+
+    expect(duplicate).not_to be_valid
+    expect(duplicate.errors[:status]).to be_present
+  end
+
+  it "calculates the timer end and remaining time from started_at" do
+    started_at = Time.zone.parse("2026-07-18 10:00:00")
+    session = described_class.new(
+      task: task,
+      started_at: started_at,
+      planned_duration_seconds: 5.minutes.to_i
+    )
+
+    expect(session.ends_at).to eq(started_at + 5.minutes)
+    expect(session.remaining_seconds(at: started_at + 2.minutes)).to eq(3.minutes.to_i)
+  end
 end
