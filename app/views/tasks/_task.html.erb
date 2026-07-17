@@ -8,6 +8,9 @@
       <% if task.estimated_minutes.present? %>
         <span><%= task.estimated_minutes %>分</span>
       <% end %>
+      <% if task.goal %>
+        <span class="goal-mark"><%= task.goal.title %></span>
+      <% end %>
     </div>
     <h3><%= link_to task.title, task %></h3>
     <% if task.description.present? %>

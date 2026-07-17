@@ -10,9 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_18_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_18_010000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "goals", force: :cascade do |t|
+    t.text "avoided_future", null: false
+    t.datetime "created_at", null: false
+    t.text "desired_future", null: false
+    t.date "target_date"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_goals_on_user_id"
+  end
 
   create_table "sessions", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -28,11 +39,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_18_000000) do
     t.datetime "created_at", null: false
     t.text "description"
     t.integer "estimated_minutes"
+    t.bigint "goal_id"
     t.date "scheduled_date", null: false
     t.string "status", default: "pending", null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
+    t.index ["goal_id"], name: "index_tasks_on_goal_id"
     t.index ["scheduled_date"], name: "index_tasks_on_scheduled_date"
     t.index ["status"], name: "index_tasks_on_status"
     t.index ["user_id"], name: "index_tasks_on_user_id"
@@ -63,7 +76,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_18_000000) do
     t.check_constraint "planned_duration_seconds IS NULL OR planned_duration_seconds > 0", name: "work_sessions_positive_planned_duration"
   end
 
+  add_foreign_key "goals", "users"
   add_foreign_key "sessions", "users"
+  add_foreign_key "tasks", "goals", on_delete: :nullify
   add_foreign_key "tasks", "users"
   add_foreign_key "work_sessions", "tasks"
   add_foreign_key "work_sessions", "users"

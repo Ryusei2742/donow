@@ -31,6 +31,7 @@
           <nav class="main-nav" aria-label="メインナビゲーション">
             <%= link_to "今日", root_path %>
             <%= link_to "タスク", tasks_path %>
+            <%= link_to "目標", goals_path %>
             <%= link_to "履歴", history_path %>
             <span class="account-email"><%= Current.user.email_address %></span>
             <%= button_to "ログアウト", session_path, method: :delete, class: "nav-logout" %>

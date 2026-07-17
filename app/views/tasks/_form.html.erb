@@ -20,6 +20,12 @@
     <%= form.text_area :description, rows: 5, placeholder: "最初に何をするかを書いておくと着手しやすくなります" %>
   </div>
 
+  <div class="field field-wide">
+    <%= form.label :goal_id, "つながる目標" %>
+    <%= form.collection_select :goal_id, @goals, :id, :title, { include_blank: "目標を選択しない" } %>
+    <p class="field-hint">目標を選ぶと、集中タイマーの開始前に未来の分岐を確認できます。</p>
+  </div>
+
   <div class="form-row">
     <div class="field">
       <%= form.label :scheduled_date, "予定日" %>

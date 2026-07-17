@@ -1,0 +1,48 @@
+<% content_for :title, "#{@goal.title} | DoNow" %>
+
+<article class="detail-card goal-detail">
+  <div class="detail-header">
+    <div>
+      <p class="eyebrow">GOAL</p>
+      <h1><%= @goal.title %></h1>
+      <% if @goal.target_date %>
+        <p class="goal-date">目標日 <%= format_date(@goal.target_date) %></p>
+      <% end %>
+    </div>
+    <%= link_to "編集", edit_goal_path(@goal), class: "button button-secondary" %>
+  </div>
+
+  <div class="future-path-grid">
+    <section class="future-path future-path-desired">
+      <p class="future-label">近づきたい未来</p>
+      <p class="future-text"><%= @goal.desired_future %></p>
+    </section>
+    <section class="future-path future-path-avoided">
+      <p class="future-label">先延ばしした場合に続く可能性がある状態</p>
+      <p class="future-text"><%= @goal.avoided_future %></p>
+    </section>
+  </div>
+
+  <p class="goal-weekly-summary">今週、この目標に向けて着手した回数 <strong><%= @goal.starts_this_week_count %>回</strong></p>
+</article>
+
+<section class="section-block">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">NEXT ACTIONS</p>
+      <h2>この目標につながるタスク</h2>
+    </div>
+    <%= link_to "+ タスクを追加", new_task_path, class: "text-link" %>
+  </div>
+
+  <% if @tasks.any? %>
+    <div class="task-list"><%= render @tasks %></div>
+  <% else %>
+    <p class="muted">この目標につながるタスクはまだありません。</p>
+  <% end %>
+</section>
+
+<div class="danger-zone">
+  <p class="muted">目標を削除しても、関連するタスクと着手記録は残ります。</p>
+  <%= button_to "この目標を削除", @goal, method: :delete, class: "text-button-danger", form: { data: { turbo_confirm: "この目標を削除しますか？関連するタスクは残ります。" } } %>
+</div>

@@ -1,0 +1,38 @@
+<%= form_with model: goal, class: "task-form" do |form| %>
+  <% if goal.errors.any? %>
+    <div class="error-box" role="alert">
+      <h2>入力内容を確認してください</h2>
+      <ul>
+        <% goal.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :title, "目標" %>
+    <%= form.text_field :title, required: true, autofocus: true, maxlength: Goal::TITLE_MAX_LENGTH, placeholder: "例：Webエンジニアとして就職する" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :desired_future, "近づきたい未来" %>
+    <%= form.text_area :desired_future, required: true, rows: 5, maxlength: Goal::FUTURE_MAX_LENGTH, placeholder: "この目標に向けて行動すると、どのような未来に近づけますか？" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :avoided_future, "先延ばしした場合に続く可能性がある状態" %>
+    <%= form.text_area :avoided_future, required: true, rows: 5, maxlength: Goal::FUTURE_MAX_LENGTH, placeholder: "断定せず、現状が続いた場合に考えられる状態を書いてください" %>
+    <p class="field-hint">責める言葉ではなく、「現状が続く可能性がある」のような表現がおすすめです。</p>
+  </div>
+
+  <div class="field">
+    <%= form.label :target_date, "目標日（任意）" %>
+    <%= form.date_field :target_date %>
+  </div>
+
+  <div class="form-actions">
+    <%= form.submit goal.new_record? ? "目標を作成" : "変更を保存", class: "button button-primary" %>
+    <%= link_to "キャンセル", goal.persisted? ? goal_path(goal) : goals_path, class: "button button-quiet" %>
+  </div>
+<% end %>

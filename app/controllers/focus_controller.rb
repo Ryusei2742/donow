@@ -3,8 +3,8 @@ class FocusController < ApplicationController
 
   def show
     @selected_task = Current.user.tasks.find(params[:task_id]) if params[:task_id].present?
-    @active_session = Current.user.work_sessions.open.focus_timers.includes(:task).first
-    @tasks = Current.user.tasks.where(status: %w[pending active]).order(scheduled_date: :asc, created_at: :asc)
+    @active_session = Current.user.work_sessions.open.focus_timers.includes(task: :goal).first
+    @tasks = Current.user.tasks.includes(:goal).where(status: %w[pending active]).order(scheduled_date: :asc, created_at: :asc)
   end
 
   def start
@@ -26,18 +26,36 @@ class FocusController < ApplicationController
   end
 
   def complete
+    goal = @focus_session.task.goal
     @focus_session.task.complete!
-    redirect_to focus_path, notice: "タスクを完了しました。おつかれさまでした。"
+
+    redirect_to focus_path, notice: completion_message(goal)
   end
 
   def interrupt
+    goal = @focus_session.task.goal
     @focus_session.task.interrupt!
-    redirect_to focus_path, notice: "作業を中断しました。"
+
+    redirect_to focus_path, notice: interruption_message(goal)
   end
 
   private
 
   def set_focus_session
     @focus_session = Current.user.work_sessions.open.focus_timers.find(params[:work_session_id])
+  end
+
+  def completion_message(goal)
+    return "タスクを完了しました。おつかれさまでした。" unless goal
+
+    "未来への一歩を記録しました。目標：#{goal.title}。近づきたい未来：#{goal.desired_future}。" \
+      "今週、この目標に向けて着手した回数：#{goal.starts_this_week_count}回。"
+  end
+
+  def interruption_message(goal)
+    return "作業を中断しました。" unless goal
+
+    "着手した事実は記録されています。目標：#{goal.title}。" \
+      "今週、この目標に向けて着手した回数：#{goal.starts_this_week_count}回。"
   end
 end

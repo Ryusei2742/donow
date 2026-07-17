@@ -1,6 +1,7 @@
 class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
+  has_many :goals, dependent: :destroy
   has_many :tasks, dependent: :destroy
   has_many :work_sessions
 

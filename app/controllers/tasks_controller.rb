@@ -1,5 +1,6 @@
 class TasksController < ApplicationController
   before_action :set_task, only: %i[show edit update destroy start complete interrupt skip]
+  before_action :set_goals, only: %i[new create edit update]
 
   def index
     @tasks = Current.user.tasks.order(scheduled_date: :asc, created_at: :asc)
@@ -67,6 +68,20 @@ class TasksController < ApplicationController
   end
 
   def task_params
-    params.require(:task).permit(:title, :description, :status, :scheduled_date, :estimated_minutes)
+    permitted = params.require(:task).permit(
+      :title,
+      :description,
+      :status,
+      :scheduled_date,
+      :estimated_minutes,
+      :goal_id
+    )
+    goal_id = permitted.delete(:goal_id)
+    permitted[:goal_id] = goal_id.present? ? Current.user.goals.find(goal_id).id : nil
+    permitted
+  end
+
+  def set_goals
+    @goals = Current.user.goals.order(:title)
   end
 end

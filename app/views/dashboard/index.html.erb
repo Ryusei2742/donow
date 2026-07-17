@@ -25,6 +25,32 @@
   </div>
 </section>
 
+<section class="section-block goal-progress-section">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">THIS WEEK</p>
+      <h2>今週、未来に向けて着手した回数</h2>
+    </div>
+    <%= link_to "目標を見る", goals_path, class: "text-link" %>
+  </div>
+
+  <% if @goals.any? %>
+    <div class="goal-progress-list">
+      <% @goals.each do |goal| %>
+        <%= link_to goal, class: "goal-progress-row" do %>
+          <span><%= goal.title %></span>
+          <strong><%= goal.starts_this_week_count %>回</strong>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="goal-progress-empty">
+      <p>目標を登録すると、小さな着手がどの未来につながるか振り返れます。</p>
+      <%= link_to "目標を作る", new_goal_path, class: "button button-secondary" %>
+    </div>
+  <% end %>
+</section>
+
 <section class="section-block">
   <div class="section-heading">
     <div>

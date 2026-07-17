@@ -68,6 +68,78 @@ RSpec.describe "Focus timer", type: :request do
       expect(response.body).to include("0:00", "完了する", "5分延長する", "10分延長する", "中断する")
       expect(response.body).to include('class="focus-outcome" data-countdown-target="outcome" >')
     end
+
+    it "keeps working for a task without a goal" do
+      get focus_path(task_id: task.id)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include(task.title, "5分タイマーを開始")
+      expect(response.body).not_to include("この5分がつながる未来")
+    end
+  end
+
+  describe "future branch" do
+    let(:goal) do
+      user.goals.create!(
+        title: "在宅収入を作る",
+        desired_future: "在宅で働くための選択肢が増える未来に近づく",
+        avoided_future: "今日と同じ状態が続き、選択肢が増えない可能性がある"
+      )
+    end
+    let(:goal_task) do
+      user.tasks.create!(title: "作品を5分進める", scheduled_date: Date.current, goal: goal)
+    end
+
+    it "shows both futures before starting the timer" do
+      get focus_path(task_id: goal_task.id)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include(
+        "この5分がつながる未来",
+        goal.desired_future,
+        goal.avoided_future,
+        "未来に近づく5分を始める"
+      )
+    end
+
+    it "escapes HTML in future descriptions" do
+      goal.update!(
+        desired_future: "<script>alert('x')</script>選択肢が増える",
+        avoided_future: "<img src=x onerror=alert('x')>現状が続く可能性がある"
+      )
+
+      get focus_path(task_id: goal_task.id)
+
+      expect(response.body).not_to include("<script>alert('x')</script>", "<img src=x onerror=alert('x')>")
+      expect(response.body).to include("&lt;script&gt;", "&lt;img")
+    end
+
+    it "shows supportive feedback after completion" do
+      session = goal_task.start!(planned_duration_seconds: 5.minutes.to_i)
+
+      patch complete_focus_path(session)
+      follow_redirect!
+
+      expect(response.body).to include(
+        "未来への一歩を記録しました",
+        goal.title,
+        goal.desired_future,
+        "今週、この目標に向けて着手した回数：1回"
+      )
+    end
+
+    it "shows non-blaming feedback after interruption" do
+      session = goal_task.start!(planned_duration_seconds: 5.minutes.to_i)
+
+      patch interrupt_focus_path(session)
+      follow_redirect!
+
+      expect(response.body).to include(
+        "着手した事実は記録されています",
+        goal.title,
+        "今週、この目標に向けて着手した回数：1回"
+      )
+    end
   end
 
   describe "timer actions" do

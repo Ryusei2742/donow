@@ -4,5 +4,6 @@ class DashboardController < ApplicationController
     @completed_count = @tasks.completed.count
     @incomplete_count = @tasks.where.not(status: :completed).count
     @started_count = @tasks.joins(:work_sessions).distinct.count
+    @goals = Current.user.goals.order(target_date: :asc, created_at: :asc)
   end
 end

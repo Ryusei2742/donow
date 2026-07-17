@@ -20,6 +20,27 @@ RSpec.describe Task, type: :model do
       expect(task.scheduled_date).to eq(Date.current)
       expect(task).to be_valid
     end
+
+    it "allows an owned goal or no goal, but rejects another user's goal" do
+      own_goal = user.goals.create!(
+        title: "自分の目標",
+        desired_future: "選択肢が増える未来に近づく",
+        avoided_future: "同じ状態が続く可能性がある"
+      )
+      other_user = User.create!(email_address: "other@example.com", password: "password123")
+      other_goal = other_user.goals.create!(
+        title: "他人の目標",
+        desired_future: "他人の未来",
+        avoided_future: "他人の状態"
+      )
+
+      expect(described_class.new(user: user, title: "目標あり", goal: own_goal)).to be_valid
+      expect(described_class.new(user: user, title: "目標なし", goal: nil)).to be_valid
+
+      invalid_task = described_class.new(user: user, title: "不正な関連", goal: other_goal)
+      expect(invalid_task).not_to be_valid
+      expect(invalid_task.errors[:goal]).to be_present
+    end
   end
 
   describe "work actions" do

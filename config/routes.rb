@@ -6,6 +6,7 @@ Rails.application.routes.draw do
 
   root "dashboard#index"
 
+  resources :goals
   resources :tasks do
     member do
       patch :start

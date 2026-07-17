@@ -2,6 +2,7 @@ class Task < ApplicationRecord
   STATUSES = %w[pending active completed skipped].freeze
 
   belongs_to :user
+  belongs_to :goal, optional: true
   has_many :work_sessions, dependent: :destroy
 
   enum :status, STATUSES.index_with(&:itself), default: :pending, validate: true
@@ -12,6 +13,7 @@ class Task < ApplicationRecord
   validates :status, presence: true
   validates :scheduled_date, presence: true
   validates :estimated_minutes, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
+  validate :goal_belongs_to_user
 
   scope :scheduled_for, ->(date) { where(scheduled_date: date) }
   scope :recent_first, -> { order(scheduled_date: :desc, created_at: :desc) }
@@ -78,6 +80,12 @@ class Task < ApplicationRecord
   end
 
   private
+
+  def goal_belongs_to_user
+    return if goal.blank? || user.blank? || goal.user_id == user_id
+
+    errors.add(:goal, "は自分の目標から選択してください")
+  end
 
   def close_open_sessions!(new_status, ended_at)
     work_sessions.open.find_each do |session|
