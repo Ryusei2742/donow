@@ -60,7 +60,7 @@ RSpec.describe "Authentication", type: :request do
       other_task.start!
       sign_in
 
-      [root_path, tasks_path, history_path].each do |path|
+      [ root_path, tasks_path, history_path ].each do |path|
         get path
         expect(response).to have_http_status(:ok)
         expect(response.body).to include(own_task.title)
