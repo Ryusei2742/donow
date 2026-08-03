@@ -7,6 +7,7 @@ export default class extends Controller {
   connect() {
     if (!this.hasEndAtValue || !this.hasDisplayTarget) return
 
+    this.element.dataset.countdownReady = "true"
     this.handleVisibilityChange = () => this.render()
     document.addEventListener("visibilitychange", this.handleVisibilityChange)
     this.render()
@@ -14,6 +15,7 @@ export default class extends Controller {
   }
 
   disconnect() {
+    delete this.element.dataset.countdownReady
     if (this.interval) window.clearInterval(this.interval)
     if (this.handleVisibilityChange) {
       document.removeEventListener("visibilitychange", this.handleVisibilityChange)
