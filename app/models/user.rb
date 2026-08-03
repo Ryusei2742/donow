@@ -4,6 +4,7 @@ class User < ApplicationRecord
   has_many :goals, dependent: :destroy
   has_many :tasks, dependent: :destroy
   has_many :work_sessions
+  has_many :avoidance_rules, dependent: :destroy
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 

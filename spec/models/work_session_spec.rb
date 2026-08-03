@@ -55,4 +55,21 @@ RSpec.describe WorkSession, type: :model do
     expect(session.ends_at).to eq(started_at + 5.minutes)
     expect(session.remaining_seconds(at: started_at + 2.minutes)).to eq(3.minutes.to_i)
   end
+
+  it "stores an owned avoidance rule and snapshots its title" do
+    rule = user.avoidance_rules.create!(title: "YouTubeを開かない")
+    session = described_class.create!(task: task, started_at: Time.current, avoidance_rule: rule)
+
+    expect(session.avoidance_rule).to eq(rule)
+    expect(session.avoidance_rule_title).to eq(rule.title)
+  end
+
+  it "rejects another user's avoidance rule" do
+    other_user = User.create!(email_address: "other@example.com", password: "password123")
+    other_rule = other_user.avoidance_rules.create!(title: "他人のルール")
+    session = described_class.new(task: task, started_at: Time.current, avoidance_rule: other_rule)
+
+    expect(session).not_to be_valid
+    expect(session.errors[:avoidance_rule]).to be_present
+  end
 end

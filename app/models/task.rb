@@ -18,9 +18,14 @@ class Task < ApplicationRecord
   scope :scheduled_for, ->(date) { where(scheduled_date: date) }
   scope :recent_first, -> { order(scheduled_date: :desc, created_at: :desc) }
 
-  def start!(planned_duration_seconds: nil)
+  def start!(planned_duration_seconds: nil, avoidance_rule: nil)
     user.with_lock do
       with_lock do
+        unless pending? || active?
+          errors.add(:base, "完了またはスキップ済みのタスクは開始できません")
+          raise ActiveRecord::RecordInvalid, self
+        end
+
         session = user.work_sessions.open.first
 
         if session && session.task_id != id
@@ -39,7 +44,8 @@ class Task < ApplicationRecord
           user: user,
           started_at: Time.current,
           status: :active,
-          planned_duration_seconds: planned_duration_seconds
+          planned_duration_seconds: planned_duration_seconds,
+          avoidance_rule: avoidance_rule
         )
       end
     end

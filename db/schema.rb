@@ -10,9 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_18_010000) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_02_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "avoidance_rules", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.string "title", limit: 100, null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index "user_id, lower((title)::text)", name: "index_avoidance_rules_on_user_and_lower_title", unique: true
+    t.index ["user_id"], name: "index_avoidance_rules_on_user_id"
+  end
 
   create_table "goals", force: :cascade do |t|
     t.text "avoided_future", null: false
@@ -60,6 +70,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_18_010000) do
   end
 
   create_table "work_sessions", force: :cascade do |t|
+    t.bigint "avoidance_rule_id"
+    t.string "avoidance_rule_title", limit: 100
     t.datetime "created_at", null: false
     t.datetime "ended_at"
     t.integer "planned_duration_seconds"
@@ -68,6 +80,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_18_010000) do
     t.bigint "task_id", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
+    t.index ["avoidance_rule_id"], name: "index_work_sessions_on_avoidance_rule_id"
     t.index ["started_at"], name: "index_work_sessions_on_started_at"
     t.index ["task_id", "status"], name: "index_work_sessions_on_task_id_and_status"
     t.index ["task_id"], name: "index_work_sessions_on_task_id"
@@ -76,10 +89,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_18_010000) do
     t.check_constraint "planned_duration_seconds IS NULL OR planned_duration_seconds > 0", name: "work_sessions_positive_planned_duration"
   end
 
+  add_foreign_key "avoidance_rules", "users"
   add_foreign_key "goals", "users"
   add_foreign_key "sessions", "users"
   add_foreign_key "tasks", "goals", on_delete: :nullify
   add_foreign_key "tasks", "users"
+  add_foreign_key "work_sessions", "avoidance_rules", on_delete: :nullify
   add_foreign_key "work_sessions", "tasks"
   add_foreign_key "work_sessions", "users"
 end

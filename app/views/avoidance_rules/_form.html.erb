@@ -1,0 +1,32 @@
+<%= form_with model: avoidance_rule, class: "task-form" do |form| %>
+  <% if avoidance_rule.errors.any? %>
+    <div class="error-box" role="alert">
+      <h2>入力内容を確認してください</h2>
+      <ul>
+        <% avoidance_rule.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :title, "この5分では避けたい行動" %>
+    <%= form.text_field :title,
+                        required: true,
+                        autofocus: true,
+                        maxlength: AvoidanceRule::TITLE_MAX_LENGTH,
+                        placeholder: "例：SNSを見ない" %>
+  </div>
+
+  <div class="checkbox-field">
+    <%= form.check_box :active %>
+    <%= form.label :active, "有効にする" %>
+  </div>
+  <p class="field-hint">無効にすると、5分タイマー開始時の選択肢に表示されません。</p>
+
+  <div class="form-actions">
+    <%= form.submit avoidance_rule.new_record? ? "登録する" : "変更を保存", class: "button button-primary" %>
+    <%= link_to "キャンセル", avoidance_rules_path, class: "button button-quiet" %>
+  </div>
+<% end %>

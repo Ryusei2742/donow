@@ -5,10 +5,61 @@
   <h1>DoNow</h1>
   <p class="catchphrase">やる気ではなく、着手を記録する</p>
   <div class="hero-actions">
-    <%= link_to "5分だけ始める", focus_path, class: "button button-primary button-large" %>
+    <% if Current.user.work_sessions.open.focus_timers.exists? %>
+      <%= link_to "進行中の5分に戻る", focus_path, class: "button button-primary button-large" %>
+    <% else %>
+      <%= link_to "タスクから5分始める", "#today-tasks", class: "button button-primary button-large" %>
+    <% end %>
     <%= link_to "今日のタスクを追加", new_task_path, class: "button button-secondary" %>
   </div>
 </section>
+
+<section class="quick-start-panel" aria-labelledby="quick-start-title">
+  <div class="quick-start-copy">
+    <p class="eyebrow">QUICK START</p>
+    <h2 id="quick-start-title">名前だけ決めて、今すぐ5分</h2>
+    <p>目標や詳しい設定は後から追加できます。</p>
+  </div>
+
+  <%= form_with model: @quick_task, url: quick_start_path, class: "quick-start-form" do |form| %>
+    <% if @quick_task.errors.any? %>
+      <div class="error-box quick-start-errors" role="alert">
+        <p>今からやることを入力してください。</p>
+      </div>
+    <% end %>
+    <div class="quick-start-controls">
+      <%= form.label :title, "今からやること", class: "visually-hidden" %>
+      <%= form.text_field :title,
+                          required: true,
+                          autofocus: @quick_task.errors.any?,
+                          placeholder: "例：企画書を開く",
+                          autocomplete: "off" %>
+      <%= form.submit "作って5分始める", class: "button button-primary button-large" %>
+    </div>
+    <div class="quick-start-avoidance">
+      <%= label_tag :quick_start_avoidance_rule_id, "この5分でやらないこと" %>
+      <%= select_tag :avoidance_rule_id,
+                     options_from_collection_for_select(active_avoidance_rules, :id, :title),
+                     include_blank: "選択しない",
+                     id: :quick_start_avoidance_rule_id %>
+    </div>
+  <% end %>
+</section>
+
+<% if @resume_task %>
+  <section class="resume-card" aria-labelledby="resume-title">
+    <div>
+      <p class="eyebrow">CONTINUE</p>
+      <h2 id="resume-title">前回の続き</h2>
+      <p class="resume-task-title"><%= @resume_task.title %></p>
+    </div>
+    <%= render "focus/start_form",
+               task: @resume_task,
+               button_label: "5分で再開",
+               location: "resume",
+               large: true %>
+  </section>
+<% end %>
 
 <section class="stats-grid" aria-label="今日の集計">
   <div class="stat-card">
@@ -51,7 +102,7 @@
   <% end %>
 </section>
 
-<section class="section-block">
+<section class="section-block" id="today-tasks">
   <div class="section-heading">
     <div>
       <p class="eyebrow"><%= format_date(Date.current) %></p>

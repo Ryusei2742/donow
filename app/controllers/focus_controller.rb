@@ -9,11 +9,16 @@ class FocusController < ApplicationController
 
   def start
     task = Current.user.tasks.find(params.require(:task_id))
-    task.start!(planned_duration_seconds: WorkSession::FOCUS_DURATION_SECONDS)
+    task.start!(
+      planned_duration_seconds: WorkSession::FOCUS_DURATION_SECONDS,
+      avoidance_rule: selected_avoidance_rule
+    )
 
     redirect_to focus_path, notice: "5分タイマーを開始しました。"
   rescue ActiveRecord::RecordInvalid => error
-    redirect_to focus_path(task_id: task&.id), alert: error.record.errors.full_messages.to_sentence
+    active_session = Current.user.work_sessions.open.focus_timers.first
+    redirect_to active_session ? focus_path : root_path,
+                alert: error.record.errors.full_messages.to_sentence
   end
 
   def extend
@@ -43,6 +48,12 @@ class FocusController < ApplicationController
 
   def set_focus_session
     @focus_session = Current.user.work_sessions.open.focus_timers.find(params[:work_session_id])
+  end
+
+  def selected_avoidance_rule
+    return if params[:avoidance_rule_id].blank?
+
+    Current.user.avoidance_rules.active.find_by(id: params[:avoidance_rule_id])
   end
 
   def completion_message(goal)

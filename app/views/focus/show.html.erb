@@ -23,6 +23,13 @@
       ・合計 <%= @active_session.planned_duration_seconds / 60 %>分
     </p>
 
+    <% if @active_session.avoidance_rule_title.present? %>
+      <aside class="focus-avoidance" aria-label="この5分でやらないこと">
+        <span>この5分でやらないこと</span>
+        <strong><%= @active_session.avoidance_rule_title %></strong>
+      </aside>
+    <% end %>
+
     <div class="timer" data-countdown-target="display" aria-live="polite">
       <%= format("%d:%02d", remaining_seconds / 60, remaining_seconds % 60) %>
     </div>
@@ -44,44 +51,43 @@
         <%= button_to "中断する", interrupt_focus_path(@active_session), method: :patch, class: "button button-quiet" %>
       </div>
     </div>
+
+    <% if @active_session.task.goal %>
+      <article class="future-branch-card" aria-labelledby="future-branch-title">
+        <p class="eyebrow">FUTURE PATH</p>
+        <h2 id="future-branch-title">この5分がつながる未来</h2>
+        <div class="future-branch-section future-branch-desired">
+          <p class="future-label">近づきたい未来</p>
+          <p class="future-text"><%= @active_session.task.goal.desired_future %></p>
+        </div>
+        <div class="future-branch-section future-branch-avoided">
+          <p class="future-label">先延ばしした場合に続く可能性がある状態</p>
+          <p class="future-context">状況が急に悪化すると決まっているわけではありません。そのうえで、次の状態が続く可能性があります。</p>
+          <p class="future-text"><%= @active_session.task.goal.avoided_future %></p>
+        </div>
+      </article>
+    <% end %>
   <% else %>
     <h1>まず5分だけやりましょう</h1>
-    <p class="muted">取りかかるタスクを1つ選んでください。開始後は、ブラウザを閉じても続きから復元できます。</p>
+    <p class="muted">取りかかるタスクのボタンを押すと、すぐに始まります。開始後は、ブラウザを閉じても続きから復元できます。</p>
 
     <% if @tasks.any? %>
-      <%= form_with url: focus_path, method: :get, class: "focus-start-form" do |form| %>
-        <div class="field focus-task-field">
-          <%= form.label :task_id, "集中するタスク" %>
-          <%= form.collection_select :task_id, @tasks, :id, :title,
-                                     { selected: @selected_task&.id, prompt: "タスクを選択してください" },
-                                     { required: true } %>
-        </div>
-        <%= form.submit "選択したタスクを確認", class: "button button-secondary" %>
-      <% end %>
-
-      <% if @selected_task %>
-        <% if @selected_task.goal %>
-          <article class="future-branch-card" aria-labelledby="future-branch-title">
-            <p class="eyebrow">FUTURE PATH</p>
-            <h2 id="future-branch-title">この5分がつながる未来</h2>
-            <div class="future-branch-section future-branch-desired">
-              <p class="future-label">近づきたい未来</p>
-              <p class="future-text"><%= @selected_task.goal.desired_future %></p>
+      <div class="focus-task-list">
+        <% @tasks.each do |task| %>
+          <div class="focus-task-option">
+            <div>
+              <strong><%= task.title %></strong>
+              <% if task.goal %>
+                <span>目標：<%= task.goal.title %></span>
+              <% end %>
             </div>
-            <div class="future-branch-section future-branch-avoided">
-              <p class="future-label">先延ばしした場合に続く可能性がある状態</p>
-              <p class="future-context">状況が急に悪化すると決まっているわけではありません。そのうえで、次の状態が続く可能性があります。</p>
-              <p class="future-text"><%= @selected_task.goal.avoided_future %></p>
-            </div>
-          </article>
+            <%= render "focus/start_form",
+                       task: task,
+                       button_label: "5分始める",
+                       location: "focus-list" %>
+          </div>
         <% end %>
-
-        <%= button_to @selected_task.goal ? "未来に近づく5分を始める" : "5分タイマーを開始",
-                      start_focus_path,
-                      method: :post,
-                      params: { task_id: @selected_task.id },
-                      class: "button button-primary button-large focus-start-button" %>
-      <% end %>
+      </div>
     <% else %>
       <div class="empty-state focus-empty-state">
         <p>開始できるタスクがありません。</p>

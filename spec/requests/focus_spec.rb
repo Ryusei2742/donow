@@ -70,10 +70,11 @@ RSpec.describe "Focus timer", type: :request do
     end
 
     it "keeps working for a task without a goal" do
-      get focus_path(task_id: task.id)
+      post start_focus_path, params: { task_id: task.id }
+      follow_redirect!
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include(task.title, "5分タイマーを開始")
+      expect(response.body).to include(task.title, "5:00")
       expect(response.body).not_to include("この5分がつながる未来")
     end
   end
@@ -90,15 +91,19 @@ RSpec.describe "Focus timer", type: :request do
       user.tasks.create!(title: "作品を5分進める", scheduled_date: Date.current, goal: goal)
     end
 
-    it "shows both futures before starting the timer" do
+    it "shows both futures in the running timer instead of before starting" do
       get focus_path(task_id: goal_task.id)
 
       expect(response).to have_http_status(:ok)
+      expect(response.body).not_to include("この5分がつながる未来", goal.desired_future, goal.avoided_future)
+
+      post start_focus_path, params: { task_id: goal_task.id }
+      follow_redirect!
+
       expect(response.body).to include(
         "この5分がつながる未来",
         goal.desired_future,
-        goal.avoided_future,
-        "未来に近づく5分を始める"
+        goal.avoided_future
       )
     end
 
@@ -108,7 +113,8 @@ RSpec.describe "Focus timer", type: :request do
         avoided_future: "<img src=x onerror=alert('x')>現状が続く可能性がある"
       )
 
-      get focus_path(task_id: goal_task.id)
+      post start_focus_path, params: { task_id: goal_task.id }
+      follow_redirect!
 
       expect(response.body).not_to include("<script>alert('x')</script>", "<img src=x onerror=alert('x')>")
       expect(response.body).to include("&lt;script&gt;", "&lt;img")
@@ -139,6 +145,85 @@ RSpec.describe "Focus timer", type: :request do
         goal.title,
         "今週、この目標に向けて着手した回数：1回"
       )
+    end
+  end
+
+  describe "avoidance rule" do
+    let(:rule) { user.avoidance_rules.create!(title: "YouTubeを開かない") }
+
+    it "shows only the signed-in user's active rules in the start controls" do
+      active_rule = rule
+      inactive_rule = user.avoidance_rules.create!(title: "無効なルール", active: false)
+      other_user = User.create!(email_address: "rule-owner@example.com", password: password)
+      other_rule = other_user.avoidance_rules.create!(title: "他人のルール")
+
+      get root_path
+
+      expect(response.body).to include("この5分でやらないこと", "選択しない", active_rule.title)
+      expect(response.body).not_to include(inactive_rule.title, other_rule.title)
+    end
+
+    it "starts without a selection" do
+      post start_focus_path, params: { task_id: task.id, avoidance_rule_id: "" }
+
+      session = user.work_sessions.last
+      expect(response).to redirect_to(focus_path)
+      expect(session.avoidance_rule).to be_nil
+      expect(session.avoidance_rule_title).to be_nil
+    end
+
+    it "stores the selected owned rule and its title snapshot" do
+      post start_focus_path, params: { task_id: task.id, avoidance_rule_id: rule.id }
+
+      session = user.work_sessions.last
+      expect(session.avoidance_rule).to eq(rule)
+      expect(session.avoidance_rule_title).to eq(rule.title)
+    end
+
+    it "ignores another user's rule id" do
+      other_user = User.create!(email_address: "rule-owner@example.com", password: password)
+      other_rule = other_user.avoidance_rules.create!(title: "他人のルール")
+
+      post start_focus_path, params: { task_id: task.id, avoidance_rule_id: other_rule.id }
+
+      session = user.work_sessions.last
+      expect(response).to redirect_to(focus_path)
+      expect(session.avoidance_rule).to be_nil
+      expect(session.avoidance_rule_title).to be_nil
+    end
+
+    it "keeps the original selection when restoring an active timer" do
+      original_rule = rule
+      replacement_rule = user.avoidance_rules.create!(title: "SNSを見ない")
+      session = task.start!(
+        planned_duration_seconds: 5.minutes.to_i,
+        avoidance_rule: original_rule
+      )
+
+      post start_focus_path, params: { task_id: task.id, avoidance_rule_id: replacement_rule.id }
+
+      expect(session.reload.avoidance_rule).to eq(original_rule)
+      expect(session.avoidance_rule_title).to eq(original_rule.title)
+    end
+
+    it "shows the escaped snapshot after start, reload, and extension" do
+      rule.update!(title: "<script>alert('x')</script>を開かない")
+
+      post start_focus_path, params: { task_id: task.id, avoidance_rule_id: rule.id }
+      follow_redirect!
+
+      expect(response.body).to include("この5分でやらないこと", "&lt;script&gt;")
+      expect(response.body).not_to include("<script>alert('x')</script>")
+
+      get focus_path
+      expect(response.body).to include("&lt;script&gt;")
+
+      session = user.work_sessions.last
+      patch extend_focus_path(session), params: { seconds: 5.minutes.to_i }
+      follow_redirect!
+
+      expect(response.body).to include("&lt;script&gt;")
+      expect(session.reload.planned_duration_seconds).to eq(10.minutes.to_i)
     end
   end
 

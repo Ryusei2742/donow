@@ -15,4 +15,11 @@ RSpec.describe User, type: :model do
 
     expect { user.destroy! }.to change(Task, :count).by(-1)
   end
+
+  it "owns avoidance rules" do
+    user = described_class.create!(email_address: "owner@example.com", password: "password123")
+    rule = user.avoidance_rules.create!(title: "SNSを見ない")
+
+    expect(user.avoidance_rules).to contain_exactly(rule)
+  end
 end

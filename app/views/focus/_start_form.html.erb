@@ -1,0 +1,12 @@
+<%= form_with url: start_focus_path, class: "focus-launch-form" do |form| %>
+  <%= form.hidden_field :task_id, value: task.id, id: "task-id-#{task.id}-#{location}" %>
+  <% select_id = "avoidance-rule-task-#{task.id}-#{location}" %>
+  <div class="avoidance-rule-select">
+    <%= label_tag select_id, "この5分でやらないこと" %>
+    <%= select_tag :avoidance_rule_id,
+                   options_from_collection_for_select(active_avoidance_rules, :id, :title),
+                   include_blank: "選択しない",
+                   id: select_id %>
+  </div>
+  <%= form.submit button_label, class: "button button-primary#{" button-large" if local_assigns[:large]}" %>
+<% end %>

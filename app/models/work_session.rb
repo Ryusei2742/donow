@@ -5,6 +5,7 @@ class WorkSession < ApplicationRecord
 
   belongs_to :task
   belongs_to :user
+  belongs_to :avoidance_rule, optional: true
 
   enum :status, STATUSES.index_with(&:itself), default: :active, validate: true
 
@@ -15,9 +16,11 @@ class WorkSession < ApplicationRecord
             allow_nil: true
   validate :ended_at_is_after_started_at
   validate :user_owns_task
+  validate :user_owns_avoidance_rule
   validate :only_one_open_session_per_user
 
   before_validation :set_user_from_task
+  before_validation :snapshot_avoidance_rule_title, on: :create
 
   scope :recent_first, -> { order(started_at: :desc) }
   scope :open, -> { active.where(ended_at: nil) }
@@ -69,6 +72,16 @@ class WorkSession < ApplicationRecord
     return if user.blank? || task.blank? || user_id == task.user_id
 
     errors.add(:user, "はタスクの所有者と一致していません")
+  end
+
+  def user_owns_avoidance_rule
+    return if avoidance_rule.blank? || user.blank? || avoidance_rule.user_id == user_id
+
+    errors.add(:avoidance_rule, "は自分のやらないことから選択してください")
+  end
+
+  def snapshot_avoidance_rule_title
+    self.avoidance_rule_title = avoidance_rule.title if avoidance_rule
   end
 
   def only_one_open_session_per_user

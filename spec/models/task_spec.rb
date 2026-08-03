@@ -74,6 +74,20 @@ RSpec.describe Task, type: :model do
         expect(user.work_sessions.open.count).to eq(1)
         expect(other_task.reload).to be_pending
       end
+
+      it "does not restart a completed or skipped task" do
+        task.update!(status: :completed, completed_at: Time.current)
+        skipped_task = described_class.create!(
+          user: user,
+          title: "スキップ済み",
+          scheduled_date: Date.current,
+          status: :skipped
+        )
+
+        expect { task.start! }.to raise_error(ActiveRecord::RecordInvalid)
+        expect { skipped_task.start! }.to raise_error(ActiveRecord::RecordInvalid)
+        expect(user.work_sessions).to be_empty
+      end
     end
 
     describe "#complete!" do

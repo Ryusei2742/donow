@@ -1,0 +1,39 @@
+<% content_for :title, "やらないこと | DoNow" %>
+
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">STAY FOCUSED</p>
+    <h1>やらないこと</h1>
+    <p>5分のあいだ避けたい行動を、あらかじめ決めておきましょう。</p>
+  </div>
+  <%= link_to "+ 新しく登録", new_avoidance_rule_path, class: "button button-primary" %>
+</div>
+
+<% if @avoidance_rules.any? %>
+  <div class="avoidance-rule-list">
+    <% @avoidance_rules.each do |avoidance_rule| %>
+      <article class="avoidance-rule-card <%= "is-inactive" unless avoidance_rule.active? %>">
+        <div>
+          <span class="badge <%= avoidance_rule.active? ? "badge-active-rule" : "badge-inactive-rule" %>">
+            <%= avoidance_rule.active? ? "有効" : "無効" %>
+          </span>
+          <h2><%= avoidance_rule.title %></h2>
+        </div>
+        <div class="avoidance-rule-actions">
+          <%= link_to "編集", edit_avoidance_rule_path(avoidance_rule), class: "button button-secondary" %>
+          <%= button_to "削除",
+                        avoidance_rule,
+                        method: :delete,
+                        class: "button button-quiet",
+                        form: { data: { turbo_confirm: "この項目を削除しますか？過去の着手記録の文言は残ります。" } } %>
+        </div>
+      </article>
+    <% end %>
+  </div>
+<% else %>
+  <div class="empty-state">
+    <h2>脱線しやすい行動を1つ決めましょう</h2>
+    <p>タイマー開始時に任意で選び、作業中に確認できます。</p>
+    <%= link_to "最初のやらないことを登録", new_avoidance_rule_path, class: "button button-primary" %>
+  </div>
+<% end %>

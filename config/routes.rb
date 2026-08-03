@@ -5,8 +5,10 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   root "dashboard#index"
+  post "quick_start", to: "dashboard#quick_start", as: :quick_start
 
   resources :goals
+  resources :avoidance_rules, except: :show
   resources :tasks do
     member do
       patch :start
